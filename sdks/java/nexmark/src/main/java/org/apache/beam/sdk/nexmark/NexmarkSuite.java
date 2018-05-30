@@ -17,10 +17,13 @@
  */
 package org.apache.beam.sdk.nexmark;
 
-import java.util.ArrayList;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
+
+import com.google.common.collect.ImmutableList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 /**
  * A set of {@link NexmarkConfiguration}s.
@@ -52,16 +55,18 @@ public enum NexmarkSuite {
    */
   LONG_RUNNING_LOGGER(longRunningLogger());
 
-  private static List<NexmarkConfiguration> defaultConf() {
-    List<NexmarkConfiguration> configurations = new ArrayList<>();
-    NexmarkConfiguration configuration = new NexmarkConfiguration();
-    configurations.add(configuration);
-    return configurations;
+  private final ImmutableList<NexmarkConfiguration> configurations;
+
+  NexmarkSuite(ImmutableList<NexmarkConfiguration> configurations) {
+    this.configurations = configurations;
   }
 
-  private static List<NexmarkConfiguration> smoke() {
-    List<NexmarkConfiguration> configurations = new ArrayList<>();
-    for (int query = 0; query <= 12; query++) {
+  private static ImmutableList<NexmarkConfiguration> defaultConf() {
+    return ImmutableList.of(new NexmarkConfiguration());
+  }
+
+  private static ImmutableList<NexmarkConfiguration> smoke() {
+    return IntStream.range(0, 12).mapToObj(query -> {
       NexmarkConfiguration configuration = NexmarkConfiguration.DEFAULT.copy();
       configuration.query = query;
       configuration.numEvents = 100_000;
@@ -69,32 +74,24 @@ public enum NexmarkSuite {
         // Scale back so overall runtimes are reasonably close across all queries.
         configuration.numEvents /= 10;
       }
-      configurations.add(configuration);
-    }
-    return configurations;
+      return configuration;
+    }).collect(collectingAndThen(toList(), ImmutableList::copyOf));
   }
 
-  private static List<NexmarkConfiguration> stress() {
-    List<NexmarkConfiguration> configurations = smoke();
-    for (NexmarkConfiguration configuration : configurations) {
+  private static ImmutableList<NexmarkConfiguration> stress() {
+    return smoke().stream().map(configuration -> {
       if (configuration.numEvents >= 0) {
         configuration.numEvents *= 1000;
       }
-    }
-    return configurations;
+      return configuration;
+    }).collect(collectingAndThen(toList(), ImmutableList::copyOf));
   }
 
-  private static List<NexmarkConfiguration> fullThrottle() {
-    List<NexmarkConfiguration> configurations = smoke();
-    for (NexmarkConfiguration configuration : configurations) {
-      if (configuration.numEvents >= 0) {
-        configuration.numEvents *= 1000;
-      }
-    }
-    return configurations;
+  private static ImmutableList<NexmarkConfiguration> fullThrottle() {
+    return stress();
   }
 
-  private static List<NexmarkConfiguration> longRunningLogger() {
+  private static ImmutableList<NexmarkConfiguration> longRunningLogger() {
     NexmarkConfiguration configuration = NexmarkConfiguration.DEFAULT.copy();
     configuration.numEventGenerators = 10;
 
@@ -113,15 +110,7 @@ public enum NexmarkSuite {
     configuration.nextEventRate = 60000;
     configuration.maxLogEvents = 15000;
 
-    List<NexmarkConfiguration> configurations = new ArrayList<>();
-    configurations.add(configuration);
-    return configurations;
-  }
-
-  private final List<NexmarkConfiguration> configurations;
-
-  NexmarkSuite(List<NexmarkConfiguration> configurations) {
-    this.configurations = configurations;
+    return ImmutableList.of(configuration);
   }
 
   /**

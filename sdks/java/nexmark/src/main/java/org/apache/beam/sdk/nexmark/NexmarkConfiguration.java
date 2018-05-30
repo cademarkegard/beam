@@ -19,6 +19,7 @@ package org.apache.beam.sdk.nexmark;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.errorprone.annotations.Immutable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
@@ -28,8 +29,16 @@ import java.util.Objects;
  * programmatically. We only capture properties which may influence the resulting
  * pipeline performance, as captured by {@link NexmarkPerf}.
  */
+@Immutable
 public class NexmarkConfiguration implements Serializable {
   public static final NexmarkConfiguration DEFAULT = new NexmarkConfiguration();
+
+  public NexmarkConfiguration(NexmarkOptions options) {
+
+  }
+
+  public NexmarkConfiguration();
+
 
   /** If {@literal true}, include additional debugging and monitoring stats. */
   @JsonProperty
@@ -235,7 +244,7 @@ public class NexmarkConfiguration implements Serializable {
    * every 1000 events per generator are emitted in pseudo-random order.
    */
   @JsonProperty
-  public long outOfOrderGroupSize = 1;
+  public final long outOfOrderGroupSize = 1;
 
   /**
    * Replace any properties of this configuration which have been supplied by the command line.
