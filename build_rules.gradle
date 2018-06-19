@@ -418,7 +418,7 @@ ext.applyJavaNature = {
   targetCompatibility = configuration.javaVersion
   tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
-    options.compilerArgs += ["-Xlint:all","-Xlint:-options","-Xlint:-cast","-Xlint:-deprecation","-Xlint:-dep-ann","-Xlint:-processing","-Xlint:-rawtypes","-Xlint:-serial","-Xlint:-try","-Xlint:-unchecked","-Xlint:-varargs","-parameters"]
+    options.compilerArgs += ["-Xlint:all","-Xlint:-options","-Xlint:-cast","-Xlint:-deprecation","-Xlint:-processing","-Xlint:-rawtypes","-Xlint:-serial","-Xlint:-try","-Xlint:-unchecked","-Xlint:-varargs","-parameters"]
     if (configuration.enableErrorProne) {
       options.compilerArgs += [
         "-XepDisableWarningsInGeneratedCode",
